@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title> Momina </title>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.0/jquery.min.js"></script>
+
+<script>
+/* digital clock widget */
+function startTime() {
+    var today = new Date();
+    var h = today.getHours();
+    var m = today.getMinutes();
+    var s = today.getSeconds();
+    m = checkTime(m);
+    s = checkTime(s);
+    document.getElementById("digi_clock").innerHTML =
+    h + ":" + m + ":" + s;
+    var t = setTimeout(startTime, 500);
+}
+function checkTime(i) {
+    if (i < 10) {i = "0" + i};  // add zero in front of numbers < 10
+    return i;
+}
+
+////////////////////////////
+
+/* calendar widget */
+// function becomes a method for each month object
+function getFirstDay(theYear, theMonth)
+{
+var firstDate = new Date(theYear,theMonth,1);
+return firstDate.getDay();
+}
+// number of days in the month
+function getMonthLen(theYear, theMonth)
+{
+var oneHour = 1000 * 60 * 60;
+var oneDay = oneHour * 24;
+var thisMonth = new Date(theYear, theMonth, 1);
+var nextMonth = new Date(theYear, theMonth + 1, 1);
+var len = Math.ceil((nextMonth.getTime() -
+thisMonth.getTime() - oneHour)/oneDay);
+return len;
+}
+// create array of month names
+theMonths = new Array("January", "February", "March", "April",
+"May", "June", "July", "August", "September",
+"October", "November", "December");
+// deferred function to fill fields of table
+function populateFields(form)  
+{  
+  // initialize variables for later from user selections  
+  var theMonth = form.chooseMonth.selectedIndex;  
+  var theYear = form.chooseYear.options[form.chooseYear.selectedIndex].value;  
+  
+  // initialize a variable for the current month  
+  var currentMonth = false;  
+  // get the current date  
+  var today = new Date();  
+  // if the selected month and year match, it's the current month  
+  if (today.getMonth() == theMonth && today.getFullYear() == theYear) {  
+    currentMonth = true;  
+  }  
+  
+  // initialize date-dependent variables  
+  // which is the first day of this month?  
+  var firstDay = getFirstDay(theYear, theMonth);  
+  // total number of <TD>...<\/TD> tags needed in for loop below  
+  var howMany = getMonthLen(theYear, theMonth);  
+  // set month and year in top field  
+  form.oneMonth.value = theMonths[theMonth] + " " + theYear;  
+  // fill fields of table  
+  for (var i = 0; i < 42; i++)  
+  {  
+    // reset the styles for the input fields  
+    form.oneDay[i].style.backgroundColor = 'white';  
+    form.oneDay[i].style.color = 'black';  
+  
+  if (i < firstDay || i >= (howMany + firstDay))  
+  {  
+    // before and after actual dates, empty fields  
+    // address fields by name and [index] number  
+    form.oneDay[i].value = "";  
+  }  
+  else  
+  {  
+    // enter date values  
+    var val =  i - firstDay + 1;  
+  
+    // if it's the current month and date, change the styles  
+    if (currentMonth && val == today.getDate()) {  
+      form.oneDay[i].style.backgroundColor = 'green';  
+      form.oneDay[i].style.color = 'white';  
+    }  
+    form.oneDay[i].value = val;  
+  }  
+ }  
+}
+</script>
+
+<link rel="stylesheet" type="text/css" href="http://fonts.googleapis.com/css?family=Tangerine">
+<style>
+#clock, #cal, #weat {
+    font-family: 'Tangerine', serif;
+    font-size: 70px;
+    font-weight: bold;
+    text-shadow: 4px 4px 4px #aaa;
+    padding: 70px;
+    text-align: center;
+    border-style: dotted;
+    float: left;
+    margin-left: 65px;
+    margin-top: 80px;
+    height: 150px;
+    width: 220px;
+}
+#cal{
+    background-color: #bdeec8;
+
+}
+#weat {
+    background-color: #b6e8ef;
+
+}
+#clock{
+    background-color: #eeeba8;
+
+}
+canvas {
+    padding: 0;
+    margin: auto;
+    display: block;
+    width: 700px;
+    height: 700px;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+}
+a {
+   display: none;
+   font-size: 16px;
+}
+TD, TH {
+   text-align:center; 
+   padding: 10px;
+}
+tr {
+   padding: 0px;
+   text-align:center; 
+}
+table {
+    border-collapse: collapse;
+}
+td input {  
+  text-align:center;  
+} 
+input {
+   font-size: 15px;
+
+}
+iframe {
+   position:fixed; 
+   top:100px; 
+   left:0px; 
+   bottom:-100px; 
+   right:0px; 
+   width:100%; 
+   height:100%; 
+   border:none; 
+   margin:0; 
+   padding:0; 
+   overflow:hidden; 
+}
+
+#digi_clock, #calen_wigi, #demo {
+
+    font-family: 'Tangerine', serif;
+    font-size: 100px;
+    font-weight: normal;
+
+}
+#demo {
+    font-size: 35px;
+    font-weight: bold;
+
+}
+h1 {
+    font-family: 'Tangerine', serif;
+    font-size: 100px;
+    font-weight: normal;
+    text-decoration: underline;
+    text-align: center;
+
+}
+</style>
+</head>
+
+
+
+<body>
+<h1 id="heading"> Widget App </h1>
+<div id="clock"> Clock
+<div id="digi_clock">
+</div>
+</div>
+<canvas id="canvas" width="400" height="400"></canvas>
+<a id="back_anchor" href="Widgets.html"> Return to Dashboard </a>
+
+<script>
+    /* to display the digital clock on load */ 
+    startTime();
+    /* for displaying the clock on the widget */
+    window.onload = function () {
+        setInterval(showClock, 1000);
+
+        function showClock() {
+            // defining canvas and its context
+            var canvas = document.getElementById('canvas');
+            var ctx = canvas.getContext('2d');
+
+            var date = new Date;
+            var angle;
+            var secHandLength = 60;
+
+            // clearing everything on the canvas. Redraws after every 1 sec (1000) in setInterval
+            ctx.clearRect(0, 0, canvas.width, canvas.height);        
+
+            OUTER_DIAL1();
+            OUTER_DIAL2();
+            CENTER_DIAL();
+            MARK_THE_HOURS();
+            MARK_THE_SECONDS();
+
+            SHOW_SECONDS();
+            SHOW_MINUTES();
+            SHOW_HOURS();
+
+            function OUTER_DIAL1() {
+                ctx.beginPath();
+                ctx.arc(canvas.width / 2, canvas.height / 2, secHandLength + 15, 0, Math.PI * 2);
+      		ctx.fillStyle = 'orange';
+      		ctx.fill();
+	        ctx.lineWidth = 1;
+		ctx.strokeStyle = 'black';
+                ctx.stroke();
+            }
+            function OUTER_DIAL2() {
+                ctx.beginPath();
+                ctx.arc(canvas.width / 2, canvas.height / 2, secHandLength + 9, 0, Math.PI * 2);
+                ctx.strokeStyle = 'black';
+                ctx.stroke();
+		ctx.fillStyle = 'black';
+      		ctx.fill();
+            }
+            function CENTER_DIAL() {
+                ctx.beginPath();
+                ctx.arc(canvas.width / 2, canvas.height / 2, 2, 0, Math.PI * 2);
+                ctx.lineWidth = 3;
+                ctx.fillStyle = 'black';
+                ctx.strokeStyle = 'white';
+                ctx.stroke();
+            }
+
+            function MARK_THE_HOURS() {
+               for (var i = 0; i < 12; i++) {
+                    angle = (i - 3) * (Math.PI * 2) / 12;       // The angle to mark on the clock
+                    ctx.lineWidth = 2;           // width of the hour marks
+                    ctx.beginPath();
+
+                    var x1 = (canvas.width / 2) + Math.cos(angle) * (secHandLength);
+                    var y1 = (canvas.height / 2) + Math.sin(angle) * (secHandLength);
+                    var x2 = (canvas.width / 2) + Math.cos(angle) * (secHandLength - (secHandLength / 7));
+                    var y2 = (canvas.height / 2) + Math.sin(angle) * (secHandLength - (secHandLength / 7));
+
+                    ctx.moveTo(x1, y1);
+                    ctx.lineTo(x2, y2);
+      		    ctx.lineWidth = 3;
+		    ctx.lineHeight = 4;
+                    ctx.strokeStyle = 'orange';
+                    ctx.stroke();
+                }
+            }
+
+            function MARK_THE_SECONDS() {
+                for (var i = 0; i < 60; i++) {
+                    angle = (i - 3) * (Math.PI * 2) / 60;       // The angle to mark.
+                    ctx.lineWidth = 1;            // width of the hand.
+                    ctx.beginPath();
+
+                    var x1 = (canvas.width / 2) + Math.cos(angle) * (secHandLength);
+                    var y1 = (canvas.height / 2) + Math.sin(angle) * (secHandLength);
+                    var x2 = (canvas.width / 2) + Math.cos(angle) * (secHandLength - (secHandLength / 30));
+                    var y2 = (canvas.height / 2) + Math.sin(angle) * (secHandLength - (secHandLength / 30));
+
+                    ctx.moveTo(x1, y1);
+                    ctx.lineTo(x2, y2);
+      		    ctx.lineWidth = 3;
+                    ctx.strokeStyle = 'orange';
+                    ctx.stroke();
+                }
+            }
+
+            function SHOW_SECONDS() {
+                var sec = date.getSeconds();
+                angle = ((Math.PI * 2) * (sec / 60)) - ((Math.PI * 2) / 4);
+                ctx.lineWidth = 0.5;              // width of the hand
+
+                ctx.beginPath();
+                // start from the clock center
+                ctx.moveTo(canvas.width / 2, canvas.height / 2);   
+                // draw the length
+                ctx.lineTo((canvas.width / 2 + Math.cos(angle) * secHandLength),
+                    canvas.height / 2 + Math.sin(angle) * secHandLength);
+
+                // tail of the second hand
+                ctx.moveTo(canvas.width / 2, canvas.height / 2);    // start from the center
+                // draw the length
+                ctx.lineTo((canvas.width / 2 - Math.cos(angle) * 20),
+                canvas.height / 2 - Math.sin(angle) * 20);
+      		ctx.lineWidth = 2;
+                ctx.strokeStyle = '#3789E5';        
+                ctx.stroke();
+            }
+
+            function SHOW_MINUTES() {
+                var min = date.getMinutes();
+                angle = ((Math.PI * 2) * (min / 60)) - ((Math.PI * 2) / 4);
+                ctx.lineWidth = 1.5;              // width of the hand
+
+                ctx.beginPath();
+                ctx.moveTo(canvas.width / 2, canvas.height / 2);  // start from the center of the clock
+                // Draw the length
+                ctx.lineTo((canvas.width / 2 + Math.cos(angle) * secHandLength / 1.1),      
+                canvas.height / 2 + Math.sin(angle) * secHandLength / 1.1);
+      		ctx.lineWidth = 3;
+                ctx.strokeStyle = 'orange';  
+                ctx.stroke();
+            }
+
+            function SHOW_HOURS() {
+                var hour = date.getHours();
+                var min = date.getMinutes();
+                angle = ((Math.PI * 2) * ((hour * 5 + (min / 60) * 5) / 60)) - ((Math.PI * 2) / 4);
+                ctx.lineWidth = 1.5;             // width of the hand
+
+                ctx.beginPath();
+                ctx.moveTo(canvas.width / 2, canvas.height / 2);     // start from the center of the clock
+                // Draw the length
+                ctx.lineTo((canvas.width / 2 + Math.cos(angle) * secHandLength / 1.5),      
+                canvas.height / 2 + Math.sin(angle) * secHandLength / 1.5);
+      		ctx.lineWidth = 3;
+                ctx.strokeStyle = 'orange';   
+                ctx.stroke();
+            }
+        }
+    }
+
+$(document).ready(function(){
+    $("#canvas").hide();
+    $("#back_anchor").hide();
+    $("#workit").hide();
+    $("#iframeHolder").hide();
+    $("#clock").click(function(){
+        $("#heading").hide();
+        $("#iframeHolder").hide();
+        $("#weat").hide();
+        $("#cal").hide();
+        $("#clock").hide();
+        $("#canvas").show();
+	$("#back_anchor").show();
+    });
+});
+
+</script>
+
+<div id="cal">Calendar
+<div id="calen_wigi">
+</div>
+</div>
+<div id="workit">
+<br>
+
+<br>
+<br>
+
+<script>
+// Initialize variable with HTML for each day's field.
+// All will have same name, so we can access via index value.
+
+var oneField = "<input type='text' name='oneDay' size='2' onfocus=''>";
+
+// Start assembling HTML for raw table:
+var content = "<form><center><table border='1'>";
+
+// Field for month and year display at top of calendar:
+content += "<tr><th colspan='7'>";
+content += "<input type='text' name='oneMonth'><\/th><\/tr>";
+
+// Days of the week at head of each column:
+content += "<tr><th>Sun<\/th><th>Mon<\/th><th>Tue<\/th><th>Wed<\/th>";
+content += "<th>Thu<\/th><th>Fri<\/th><th>Sat<\/th><\/tr>";
+content += "<tr>";
+
+// layout 6 rows of fields
+for (var i = 1; i < 43; i++)
+{
+content += "<td align='middle'>" + oneField + "<\/td>";
+if (i % 7 == 0)
+{
+content += "<\/tr><tr>";
+}
+}
+content += "<\/table>";
+// blast empty table to the document
+document.write(content);
+</script>
+
+<form>
+<select name="chooseMonth" onChange="populateFields(this.form)">
+<option value="January" selected="selected">January</option>
+<option value="February">February</option>
+<option value="March">March</option>
+<option value="April">April</option>
+<option value="May">May</option>
+<option value="June">June</option>
+<option value="July">July</option>
+<option value="August">August</option>
+<option value="September">September</option>
+<option value="October">October</option>
+<option value="November">November</option>
+<option value="December">December</option>
+</select>
+<select name="chooseYear" onChange="populateFields(this.form)">
+<option value="2010" selected="selected">2010</option>
+<option value="2011">2011</option>
+<option value="2012">2012</option>
+<option value="2013">2013</option>
+<option value="2014">2014</option>
+<option value="2015">2015</option>
+<option value="2016">2016</option>
+<option value="2017">2017</option>
+<option value="2018">2018</option>
+<option value="2019">2019</option>
+</select>
+<br />
+</form>
+</div>
+
+<script>  
+/* for displaying current year on widget load */
+var today = new Date();  
+var thisMonth = today.getMonth();  
+var thisYear = today.getFullYear();  
+var years = [2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019];  
+var theForm = document.forms[0];  
+for (var i=0, len = years.length; i < len; i++) {  
+     if (years[i] == thisYear)   
+     break;  
+}  
+theForm.chooseMonth.selectedIndex = thisMonth;  
+theForm.chooseYear.selectedIndex = i;  
+populateFields(theForm);  
+
+/* to display current date on page load */
+var d = new Date();
+var n = d.toLocaleDateString();
+document.getElementById("calen_wigi").innerHTML = n;
+
+    $("#cal").click(function(){
+        $("#heading").hide();
+     	$("#cal").hide();
+        $("#weat").hide();
+        $("#clock").hide();
+    	$("#workit").show();
+    	$("#back_anchor").show();
+    });
+
+</script>
+
+
+<div id="weat"> Weather
+	<img id="img"></img>
+	<p id="demo"></p>       
+</div>
+
+<div id="iframeHolder"></div>
+<script>
+/* for displaying weather from Wunderground (aka Weather Underground) API */
+    
+    var x = document.getElementById("demo");
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(showPosition, showError);
+    } 
+    else { 
+        x.innerHTML = "Geolocation is not supported by your browser.";
+    }
+
+function showError(error) {
+    switch(error.code) {
+        case error.PERMISSION_DENIED:
+            x.innerHTML = "The request for Geolocation is denied."
+            break;
+        case error.POSITION_UNAVAILABLE:
+            x.innerHTML = "Location information is unavailable."
+            break;
+        case error.TIMEOUT:
+            x.innerHTML = "The request to get user location timed out."
+            break;
+        case error.UNKNOWN_ERROR:
+            x.innerHTML = "An unknown error occurred."
+            break;
+    }
+}
+    function showPosition(position) {
+	    var location = position.coords.latitude + "," + position.coords.longitude;    
+    jQuery(document).ready(function($) {
+	$.ajax({
+  		url : "https://api.wunderground.com/api/+"My_API_key"+/geolookup/conditions/q/"+location+".json",
+  		dataType : "jsonp",
+		success : function(parsed_json) {
+  		var location = parsed_json['location']['city'];
+  		var temp_c = parsed_json['current_observation']['temp_c']; 
+		var img = parsed_json['current_observation']['icon_url'];
+		var desc = parsed_json['current_observation']['weather'];
+  		//var wind = parsed_json['current_observation']['wind_string'];
+  		x.innerHTML = "Current temperature of " + location + " : " + temp_c + " ° C <br> " + desc;
+		//filling the image src attribute with the image url
+		$('#img').attr('src', img);
+		}
+  	});
+	});
+} 
+$(function() {
+    $('#weat').click(function(){
+        $("#heading").hide();
+        $("#weat").hide();
+        $("#cal").hide();
+        $("#clock").hide();
+	$("#workit").hide();
+        $("#back_anchor").show();
+ 	$("#iframeHolder").show();
+        if(!$('#iframe').length) {
+                $('#iframeHolder').html('<iframe id="iframe" src="http://www.wunderground.com/"></iframe>');
+        }
+    });   
+});
+</script>
+</body>
+</html>
